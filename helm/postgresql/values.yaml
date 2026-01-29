@@ -1,0 +1,15 @@
+image:
+  repository: postgres
+  tag: "17"
+  pullPolicy: IfNotPresent
+
+postgres:
+  user: nifi
+  password: nifi
+  database: nifi_registry
+
+storage:
+  size: 8Gi
+
+service:
+  port: 5432

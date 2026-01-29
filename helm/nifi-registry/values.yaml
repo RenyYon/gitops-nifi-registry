@@ -1,0 +1,21 @@
+image:
+  repository: apache/nifi-registry
+  tag: 1.28.1
+  pullPolicy: IfNotPresent
+
+service:
+  port: 18080
+
+database:
+  url: jdbc:postgresql://postgresql:5432/nifi_registry
+  driverClass: org.postgresql.Driver
+  username: nifi
+  password: nifi
+
+resources:
+  requests:
+    cpu: 500m
+    memory: 512Mi
+  limits:
+    cpu: 1
+    memory: 1024Mi
