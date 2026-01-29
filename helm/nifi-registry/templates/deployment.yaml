@@ -20,12 +20,12 @@ spec:
             - containerPort: 18080
           volumeMounts:
             - name: config
-              mountPath: /opt/nifi-registry/nifi-registry-current/conf/nifi-registry.properties
-              subPath: nifi-registry.properties
+              mountPath: /opt/nifi-registry/nifi-registry-current/conf
           resources:
 {{ toYaml .Values.resources | indent 12 }}
       volumes:
         - name: config
           configMap:
             name: nifi-registry-config
+
 
