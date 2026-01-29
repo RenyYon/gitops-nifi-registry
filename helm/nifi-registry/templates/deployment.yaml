@@ -1,32 +1,49 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nifi-registry
+  name: {{ include "nifi-registry.name" . }}
+  labels:
+{{ include "nifi-registry.labels" . | indent 4 }}
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: nifi-registry
+{{ include "nifi-registry.labels" . | indent 6 }}
   template:
     metadata:
       labels:
-        app: nifi-registry
+{{ include "nifi-registry.labels" . | indent 8 }}
     spec:
       containers:
         - name: nifi-registry
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+
           ports:
             - containerPort: 18080
-          volumeMounts:
-            - name: config
-              mountPath: /opt/nifi-registry/conf/nifi-registry.properties
-              subPath: nifi-registry.properties
+              name: http
+
+          env:
+            - name: NIFI_REGISTRY_FLOW_PROVIDER
+              value: database
+
+            - name: NIFI_REGISTRY_DB_URL
+              value: {{ .Values.database.url | quote }}
+
+            - name: NIFI_REGISTRY_DB_CLASS
+              value: {{ .Values.database.driverClass | quote }}
+
+            - name: NIFI_REGISTRY_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: nifi-registry-db
+                  key: username
+
+            - name: NIFI_REGISTRY_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nifi-registry-db
+                  key: password
+
           resources:
 {{ toYaml .Values.resources | indent 12 }}
-      volumes:
-        - name: config
-          configMap:
-            name: nifi-registry-config
-
-

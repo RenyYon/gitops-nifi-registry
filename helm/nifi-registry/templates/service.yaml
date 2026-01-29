@@ -1,12 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: nifi-registry
+  name: {{ include "nifi-registry.name" . }}
 spec:
-  type: ClusterIP
+  type: {{ .Values.service.type }}
   selector:
-    app: nifi-registry
+{{ include "nifi-registry.labels" . | indent 4 }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: 18080
+      targetPort: http
       protocol: TCP
+      name: http

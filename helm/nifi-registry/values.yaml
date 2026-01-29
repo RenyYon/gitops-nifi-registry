@@ -4,6 +4,7 @@ image:
   pullPolicy: IfNotPresent
 
 service:
+  type: ClusterIP
   port: 18080
 
 database:
@@ -18,5 +19,4 @@ resources:
     memory: 768Mi
   limits:
     cpu: 2
-    memory: 2048Mi
-
+    memory: 2Gi
