@@ -1,6 +1,6 @@
 image:
-  repository: apache/nifi-registry
-  tag: 1.28.1
+  repository: nifi-registry
+  tag: 2.6.0-jdbc
   pullPolicy: IfNotPresent
 
 service:
@@ -15,7 +15,8 @@ database:
 resources:
   requests:
     cpu: 500m
-    memory: 512Mi
+    memory: 768Mi
   limits:
-    cpu: 1
-    memory: 1024Mi
+    cpu: 2
+    memory: 2048Mi
+

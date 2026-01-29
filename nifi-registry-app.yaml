@@ -7,13 +7,13 @@ spec:
   project: default
 
   source:
-    repoURL: https://github.com/RenyYon/nifi-registry.git
+    repoURL: https://github.com/RenyYon/gitops-nifi-registry
     targetRevision: main
     path: helm/nifi-registry
 
   destination:
     server: https://kubernetes.default.svc
-    namespace: nifi
+    namespace: nifi-registry
 
   syncPolicy:
     automated:
