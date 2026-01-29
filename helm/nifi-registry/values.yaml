@@ -1,6 +1,6 @@
 image:
-  repository: nifi-registry
-  tag: 2.6.0-jdbc
+  repository: apache/nifi-registry
+  tag: 2.6.0
   pullPolicy: IfNotPresent
 
 service:
