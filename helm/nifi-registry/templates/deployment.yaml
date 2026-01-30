@@ -28,7 +28,7 @@ spec:
               chmod 0644 /drivers/postgresql-42.7.9.jar
           volumeMounts:
             - name: volume-drivers-nifireg
-              mountPath: /drivers
+              mountPath: /opt/nifi-drivers
 
       containers:
         - name: nifireg-container
@@ -54,7 +54,7 @@ spec:
 
           volumeMounts:
             - name: volume-drivers-nifireg
-              mountPath: /opt/nifi-registry/lib
+              mountPath: /opt/nifi-drivers
 
           readinessProbe:
             httpGet:
