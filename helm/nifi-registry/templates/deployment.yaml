@@ -20,7 +20,11 @@ spec:
           command:
             - /bin/sh
             - -c
-              wget --no-check-certificate -O /opt/nifi-drivers/postgresql.jar https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.9/postgresql-42.7.9.jar && chmod 0644 /opt/nifi-drivers/postgresql.jar
+            - |
+              wget --no-check-certificate \
+                -O /opt/nifi-drivers/postgresql.jar \
+                https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.9/postgresql-42.7.9.jar && \
+              chmod 0644 /opt/nifi-drivers/postgresql.jar
           volumeMounts:
             - name: drivers
               mountPath: /opt/nifi-drivers
