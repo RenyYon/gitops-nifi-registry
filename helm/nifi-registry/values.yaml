@@ -1,6 +1,8 @@
+replicaCount: 1
+
 image:
   repository: apache/nifi-registry
-  tag: 2.6.0
+  tag: "2.6.0"
   pullPolicy: IfNotPresent
 
 service:
@@ -10,8 +12,7 @@ service:
 database:
   url: jdbc:postgresql://postgresql:5432/nifi_registry
   driverClass: org.postgresql.Driver
-  username: nifi
-  password: nifi
+  secretName: nifi-registry-db
 
 resources:
   requests:

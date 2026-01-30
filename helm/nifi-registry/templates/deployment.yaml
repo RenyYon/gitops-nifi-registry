@@ -5,45 +5,52 @@ metadata:
   labels:
 {{ include "nifi-registry.labels" . | indent 4 }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount | default 1 }}
   selector:
     matchLabels:
-{{ include "nifi-registry.labels" . | indent 6 }}
+{{ include "nifi-registry.selectorLabels" . | indent 6 }}
   template:
     metadata:
       labels:
-{{ include "nifi-registry.labels" . | indent 8 }}
+{{ include "nifi-registry.selectorLabels" . | indent 8 }}
     spec:
+      initContainers:
+        - name: init-nifireg-container
+          image: mwendler/wget:latest
+          command:
+            - /bin/sh
+            - -c
+              wget --no-check-certificate -O /opt/nifi-drivers/postgresql.jar https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.9/postgresql-42.7.9.jar && chmod 0644 /opt/nifi-drivers/postgresql.jar
+          volumeMounts:
+            - name: drivers
+              mountPath: /opt/nifi-drivers
+
       containers:
         - name: nifi-registry
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-
           ports:
-            - containerPort: 18080
-              name: http
-
+            - name: http
+              containerPort: 18080
+              protocol: TCP
           env:
             - name: NIFI_REGISTRY_FLOW_PROVIDER
               value: database
-
             - name: NIFI_REGISTRY_DB_URL
               value: {{ .Values.database.url | quote }}
-
             - name: NIFI_REGISTRY_DB_CLASS
               value: {{ .Values.database.driverClass | quote }}
-
-            - name: NIFI_REGISTRY_DB_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: nifi-registry-db
-                  key: username
-
-            - name: NIFI_REGISTRY_DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: nifi-registry-db
-                  key: password
-
+            - name: NIFI_REGISTRY_DB_DIR
+              value: /opt/nifi-drivers
+          envFrom:
+            - secretRef:
+                name: {{ .Values.database.secretName }}
+          volumeMounts:
+            - name: drivers
+              mountPath: /opt/nifi-drivers
           resources:
 {{ toYaml .Values.resources | indent 12 }}
+
+      volumes:
+        - name: drivers
+          emptyDir: {}
