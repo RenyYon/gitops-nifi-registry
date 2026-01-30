@@ -14,6 +14,7 @@ spec:
       labels:
 {{ include "nifi-registry.selectorLabels" . | indent 8 }}
     spec:
+
       initContainers:
         - name: init-nifireg-container
           image: mwendler/wget:latest
@@ -22,39 +23,56 @@ spec:
             - -c
             - |
               wget --no-check-certificate \
-                -O /opt/nifi-drivers/postgresql.jar \
+                -O /drivers/postgresql-42.7.9.jar \
                 https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.9/postgresql-42.7.9.jar && \
-              chmod 0644 /opt/nifi-drivers/postgresql.jar
+              chmod 0644 /drivers/postgresql-42.7.9.jar
           volumeMounts:
-            - name: drivers
-              mountPath: /opt/nifi-drivers
+            - name: volume-drivers-nifireg
+              mountPath: /drivers
 
       containers:
-        - name: nifi-registry
+        - name: nifireg-container
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+
           ports:
             - name: http
               containerPort: 18080
               protocol: TCP
+
           env:
             - name: NIFI_REGISTRY_FLOW_PROVIDER
               value: database
             - name: NIFI_REGISTRY_DB_URL
               value: {{ .Values.database.url | quote }}
             - name: NIFI_REGISTRY_DB_CLASS
-              value: {{ .Values.database.driverClass | quote }}
-            - name: NIFI_REGISTRY_DB_DIR
-              value: /opt/nifi-drivers
+              value: org.postgresql.Driver
+
           envFrom:
             - secretRef:
                 name: {{ .Values.database.secretName }}
+
           volumeMounts:
-            - name: drivers
-              mountPath: /opt/nifi-drivers
+            - name: volume-drivers-nifireg
+              mountPath: /opt/nifi-registry/lib
+
+          readinessProbe:
+            httpGet:
+              path: /nifi-registry
+              port: 18080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /nifi-registry
+              port: 18080
+            initialDelaySeconds: 120
+            periodSeconds: 20
+
           resources:
 {{ toYaml .Values.resources | indent 12 }}
 
       volumes:
-        - name: drivers
+        - name: volume-drivers-nifireg
           emptyDir: {}
