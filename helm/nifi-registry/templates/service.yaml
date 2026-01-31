@@ -4,12 +4,14 @@ metadata:
   name: {{ include "nifi-registry.name" . }}
   labels:
 {{ include "nifi-registry.labels" . | indent 4 }}
+
 spec:
-  type: {{ .Values.service.type }}
+  type: ClusterIP
   selector:
 {{ include "nifi-registry.selectorLabels" . | indent 4 }}
+
   ports:
-    - port: {{ .Values.service.port }}
+    - name: http
+      port: {{ .Values.service.port }}
       targetPort: 18080
       protocol: TCP
-      name: http
