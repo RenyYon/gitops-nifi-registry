@@ -2,9 +2,10 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nifi-registry
-  namespace: nifi-registry
+  labels:
+{{ include "nifi-registry.labels" . | indent 4 }}
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app: nifi-registry
@@ -17,17 +18,37 @@ spec:
         - name: nifi-registry
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+
           ports:
             - containerPort: 18080
+              name: http
+
           envFrom:
             - secretRef:
-                name: {{ .Values.database.secretName }}
+                name: nifi-registry-db
+
           volumeMounts:
             - name: config
               mountPath: /opt/nifi-registry/nifi-registry-current/conf/nifi-registry.properties
               subPath: nifi-registry.properties
+
+          readinessProbe:
+            httpGet:
+              path: /nifi-registry
+              port: 18080
+            initialDelaySeconds: 60
+            periodSeconds: 10
+
+          livenessProbe:
+            httpGet:
+              path: /nifi-registry
+              port: 18080
+            initialDelaySeconds: 120
+            periodSeconds: 20
+
           resources:
 {{ toYaml .Values.resources | indent 12 }}
+
       volumes:
         - name: config
           configMap:
