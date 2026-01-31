@@ -2,13 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: nifi-registry-config
+  labels:
+{{ include "nifi-registry.labels" . | indent 4 }}
 data:
-  nifi-registry.properties: |
-    nifi.registry.web.http.host=0.0.0.0
-    nifi.registry.web.http.port=18080
-    nifi.registry.web.https.host=
-    nifi.registry.web.https.port=
-    nifi.registry.db.url={{ .Values.database.url }}
-    nifi.registry.db.driverClass={{ .Values.database.driverClass }}
-    nifi.registry.db.username={{ .Values.database.username }}
-    nifi.registry.db.password={{ .Values.database.password }}
+  dummy: "true"
