@@ -5,11 +5,11 @@ metadata:
   labels:
 {{ include "nifi-registry.labels" . | indent 4 }}
 spec:
-  type: {{ .Values.service.type | default "ClusterIP" }}
+  type: {{ .Values.service.type }}
   selector:
 {{ include "nifi-registry.selectorLabels" . | indent 4 }}
   ports:
-    - name: http
-      port: {{ .Values.service.port }}
-      targetPort: http
+    - port: {{ .Values.service.port }}
+      targetPort: 18080
       protocol: TCP
+      name: http

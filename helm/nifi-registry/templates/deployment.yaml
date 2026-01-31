@@ -5,7 +5,7 @@ metadata:
   labels:
 {{ include "nifi-registry.labels" . | indent 4 }}
 spec:
-  replicas: {{ .Values.replicaCount | default 1 }}
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
 {{ include "nifi-registry.selectorLabels" . | indent 6 }}
@@ -16,22 +16,21 @@ spec:
     spec:
 
       initContainers:
-        - name: init-nifireg-container
-          image: mwendler/wget:latest
+        - name: download-postgres-driver
+          image: busybox:1.36
           command:
-            - /bin/sh
+            - sh
             - -c
             - |
-              wget --no-check-certificate \
-                -O /drivers/postgresql-42.7.9.jar \
-                https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.9/postgresql-42.7.9.jar && \
-              chmod 0644 /drivers/postgresql-42.7.9.jar
+              wget -O /opt/nifi-drivers/postgresql-{{ .Values.jdbc.driverVersion }}.jar \
+                {{ .Values.jdbc.downloadUrl }} && \
+              chmod 0644 /opt/nifi-drivers/postgresql-{{ .Values.jdbc.driverVersion }}.jar
           volumeMounts:
-            - name: volume-drivers-nifireg
+            - name: jdbc-drivers
               mountPath: /opt/nifi-drivers
 
       containers:
-        - name: nifireg-container
+        - name: nifi-registry
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
 
@@ -46,14 +45,16 @@ spec:
             - name: NIFI_REGISTRY_DB_URL
               value: {{ .Values.database.url | quote }}
             - name: NIFI_REGISTRY_DB_CLASS
-              value: org.postgresql.Driver
+              value: {{ .Values.database.driverClass | quote }}
+            - name: NIFI_REGISTRY_DB_DIR
+              value: /opt/nifi-drivers
 
           envFrom:
             - secretRef:
                 name: {{ .Values.database.secretName }}
 
           volumeMounts:
-            - name: volume-drivers-nifireg
+            - name: jdbc-drivers
               mountPath: /opt/nifi-drivers
 
           readinessProbe:
@@ -74,5 +75,5 @@ spec:
 {{ toYaml .Values.resources | indent 12 }}
 
       volumes:
-        - name: volume-drivers-nifireg
+        - name: jdbc-drivers
           emptyDir: {}
