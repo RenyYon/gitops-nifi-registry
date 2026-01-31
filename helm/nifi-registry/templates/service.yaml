@@ -5,10 +5,10 @@ metadata:
   labels:
     app: nifi-registry
 spec:
-  type: {{ .Values.service.type }}
+  type: ClusterIP
   selector:
     app: nifi-registry
   ports:
-    - port: {{ .Values.service.port }}
+    - port: 18080
       targetPort: 18080
       protocol: TCP

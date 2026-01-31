@@ -5,7 +5,7 @@ metadata:
   labels:
     app: nifi-registry
 spec:
-  replicas: 1
+  replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       app: nifi-registry
@@ -14,28 +14,39 @@ spec:
       labels:
         app: nifi-registry
     spec:
+      initContainers:
+        - name: download-postgres-driver
+          image: curlimages/curl:8.6.0
+          command:
+            - sh
+            - -c
+            - |
+              curl -L https://jdbc.postgresql.org/download/postgresql-42.7.4.jar \
+                -o /drivers/postgresql.jar
+          volumeMounts:
+            - name: postgres-driver
+              mountPath: /drivers
+
       containers:
         - name: nifi-registry
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: 18080
-          env:
-            - name: NIFI_REGISTRY_FLOW_PROVIDER
-              value: database
-
-            - name: NIFI_REGISTRY_DB_URL
-              value: "jdbc:postgresql://{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}"
-
-            - name: NIFI_REGISTRY_DB_CLASS
-              value: org.postgresql.Driver
           envFrom:
             - secretRef:
                 name: nifi-registry-db
+          volumeMounts:
+            - name: config
+              mountPath: /opt/nifi-registry/nifi-registry-current/conf/nifi-registry.properties
+              subPath: nifi-registry.properties
+            - name: postgres-driver
+              mountPath: /opt/nifi-registry/nifi-registry-current/lib
           resources:
-            requests:
-              cpu: {{ .Values.resources.requests.cpu }}
-              memory: {{ .Values.resources.requests.memory }}
-            limits:
-              cpu: {{ .Values.resources.limits.cpu }}
-              memory: {{ .Values.resources.limits.memory }}
+{{ toYaml .Values.resources | indent 12 }}
+
+      volumes:
+        - name: config
+          configMap:
+            name: nifi-registry-config
+        - name: postgres-driver
+          emptyDir: {}

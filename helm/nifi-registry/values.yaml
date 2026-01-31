@@ -1,13 +1,17 @@
 image:
   repository: apache/nifi-registry
-  tag: "2.6.0"
-  pullPolicy: IfNotPresent
+  tag: 2.6.0
 
 replicaCount: 1
 
 service:
-  type: ClusterIP
   port: 18080
+
+database:
+  host: postgresql.nifi-registry.svc.cluster.local
+  port: 5432
+  name: nifi_registry
+  secretName: nifi-registry-db
 
 resources:
   requests:
@@ -16,8 +20,3 @@ resources:
   limits:
     cpu: 500m
     memory: 1Gi
-
-database:
-  host: postgresql
-  port: 5432
-  name: nifi_registry
