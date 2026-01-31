@@ -2,7 +2,11 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: nifi-registry-config
-  labels:
-{{ include "nifi-registry.labels" . | indent 4 }}
+  namespace: nifi-registry
 data:
-  dummy: "true"
+  nifi-registry.properties: |
+    nifi.registry.db.url=jdbc:postgresql://{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}
+    nifi.registry.db.driver.class=org.postgresql.Driver
+    nifi.registry.db.driver.directory=/opt/nifi-registry/nifi-registry-current/lib
+    nifi.registry.db.username=${NIFI_REGISTRY_DB_USERNAME}
+    nifi.registry.db.password=${NIFI_REGISTRY_DB_PASSWORD}

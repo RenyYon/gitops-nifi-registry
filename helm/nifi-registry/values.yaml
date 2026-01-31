@@ -1,5 +1,3 @@
-replicaCount: 1
-
 image:
   repository: apache/nifi-registry
   tag: "2.6.0"
@@ -10,14 +8,15 @@ service:
   port: 18080
 
 database:
-  url: jdbc:postgresql://postgresql:5432/nifi_registry
-  driverClass: org.postgresql.Driver
-  secretName: nifi-registry-db   # <-- СУЩЕСТВУЮЩИЙ SECRET
+  host: postgresql.nifi-registry.svc.cluster.local
+  port: 5432
+  name: nifi_registry
+  secretName: nifi-registry-db
 
 resources:
   requests:
-    cpu: 500m
-    memory: 768Mi
+    memory: "512Mi"
+    cpu: "250m"
   limits:
-    cpu: 2
-    memory: 2Gi
+    memory: "1Gi"
+    cpu: "500m"
