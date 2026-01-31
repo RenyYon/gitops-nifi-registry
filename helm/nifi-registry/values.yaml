@@ -1,9 +1,9 @@
-replicaCount: 1
-
 image:
   repository: apache/nifi-registry
   tag: "2.6.0"
   pullPolicy: IfNotPresent
+
+replicaCount: 1
 
 service:
   type: ClusterIP
@@ -18,6 +18,6 @@ resources:
     memory: 1Gi
 
 database:
-  url: jdbc:postgresql://postgresql:5432/nifi_registry
-  username: nifi
-  password: nifi
+  host: postgresql
+  port: 5432
+  name: nifi_registry

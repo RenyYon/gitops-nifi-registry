@@ -3,9 +3,9 @@ kind: Deployment
 metadata:
   name: nifi-registry
   labels:
-{{ include "nifi-registry.labels" . | indent 4 }}
+    app: nifi-registry
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: 1
   selector:
     matchLabels:
       app: nifi-registry
@@ -18,38 +18,24 @@ spec:
         - name: nifi-registry
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-
           ports:
             - containerPort: 18080
-              name: http
+          env:
+            - name: NIFI_REGISTRY_FLOW_PROVIDER
+              value: database
 
+            - name: NIFI_REGISTRY_DB_URL
+              value: "jdbc:postgresql://{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}"
+
+            - name: NIFI_REGISTRY_DB_CLASS
+              value: org.postgresql.Driver
           envFrom:
             - secretRef:
                 name: nifi-registry-db
-
-          volumeMounts:
-            - name: config
-              mountPath: /opt/nifi-registry/nifi-registry-current/conf/nifi-registry.properties
-              subPath: nifi-registry.properties
-
-          readinessProbe:
-            httpGet:
-              path: /nifi-registry
-              port: 18080
-            initialDelaySeconds: 60
-            periodSeconds: 10
-
-          livenessProbe:
-            httpGet:
-              path: /nifi-registry
-              port: 18080
-            initialDelaySeconds: 120
-            periodSeconds: 20
-
           resources:
-{{ toYaml .Values.resources | indent 12 }}
-
-      volumes:
-        - name: config
-          configMap:
-            name: nifi-registry-config
+            requests:
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}

@@ -3,13 +3,12 @@ kind: Service
 metadata:
   name: nifi-registry
   labels:
-{{ include "nifi-registry.labels" . | indent 4 }}
+    app: nifi-registry
 spec:
   type: {{ .Values.service.type }}
+  selector:
+    app: nifi-registry
   ports:
     - port: {{ .Values.service.port }}
       targetPort: 18080
       protocol: TCP
-      name: http
-  selector:
-    app: nifi-registry
