@@ -31,6 +31,12 @@ spec:
         - name: nifi-registry
           image: "apache/nifi-registry:2.6.0"
           imagePullPolicy: IfNotPresent
+          command:
+            - sh
+            - -c
+            - >
+              /opt/nifi-registry/nifi-registry-current/bin/nifi-registry.sh start &&
+              tail -f /opt/nifi-registry/nifi-registry-current/logs/nifi-registry-app.log
           ports:
             - containerPort: 18080
           envFrom:
