@@ -26,9 +26,9 @@ resources:
 jdbc:
   driverVersion: "42.7.9"
 
-postgres:
-  host: postgresql
+database:
+  host: postgresql.nifi-registry.svc.cluster.local
   port: 5432
-  database: nifi-registry
+  name: nifi-registry
   user: nifi
   password: nifi-password

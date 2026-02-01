@@ -2,15 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: nifi-registry-config
-  labels:
-    app: nifi-registry
 data:
-  nifi-registry.properties: |
-    nifi.registry.web.http.port=18080
-
-    nifi.registry.db.url=jdbc:postgresql://{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}
-    nifi.registry.db.driver.class=org.postgresql.Driver
-    nifi.registry.db.username=${NIFI_REGISTRY_DB_USERNAME}
-    nifi.registry.db.password=${NIFI_REGISTRY_DB_PASSWORD}
-
-    nifi.registry.db.max.connections=5
+  NIFI_REGISTRY_DB_URL: "jdbc:postgresql://{{ .Values.database.host }}:{{ .Values.database.port }}/{{ .Values.database.name }}"
+  NIFI_REGISTRY_DB_CLASS: "org.postgresql.Driver"
+  NIFI_REGISTRY_FLOW_PROVIDER: "database"
