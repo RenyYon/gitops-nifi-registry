@@ -2,8 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nifi-registry
-  labels:
-    app: nifi-registry
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
@@ -15,38 +13,34 @@ spec:
         app: nifi-registry
     spec:
       initContainers:
-        - name: download-postgres-driver
+        - name: download-jdbc
           image: curlimages/curl:8.6.0
           command:
             - sh
             - -c
-            - |
-              curl -L https://jdbc.postgresql.org/download/postgresql-42.7.4.jar \
-                -o /drivers/postgresql.jar
+            - >
+              curl -fL
+              https://repo1.maven.org/maven2/org/postgresql/postgresql/{{ .Values.jdbc.driverVersion }}/postgresql-{{ .Values.jdbc.driverVersion }}.jar
+              -o /opt/nifi-drivers/postgresql.jar
           volumeMounts:
-            - name: postgres-driver
-              mountPath: /drivers
+            - name: drivers
+              mountPath: /opt/nifi-drivers
 
       containers:
         - name: nifi-registry
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: 18080
           envFrom:
             - secretRef:
                 name: nifi-registry-db
-          volumeMounts:
-            - name: config
-              mountPath: /opt/nifi-registry/nifi-registry-current/conf/nifi-registry.properties
-              subPath: nifi-registry.properties
-            - name: postgres-driver
-              mountPath: /opt/nifi-registry/nifi-registry-current/lib
           resources:
-{{ toYaml .Values.resources | indent 12 }}
+            {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+            - name: drivers
+              mountPath: /opt/nifi-drivers
 
       volumes:
-        - name: config
-          configMap:
-            name: nifi-registry-config
-        - name: postgres-driver
+        - name: drivers
           emptyDir: {}
