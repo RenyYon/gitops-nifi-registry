@@ -19,12 +19,13 @@ spec:
             - sh
             - -c
             - >
+              mkdir -p /opt/nifi-registry/nifi-registry-current/lib/ext &&
               curl -fL
               https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.9/postgresql-42.7.9.jar
-              -o /opt/nifi-registry/nifi-registry-current/lib/postgresql.jar
+              -o /opt/nifi-registry/nifi-registry-current/lib/ext/postgresql.jar
           volumeMounts:
-            - name: registry-lib
-              mountPath: /opt/nifi-registry/nifi-registry-current/lib
+            - name: registry-lib-ext
+              mountPath: /opt/nifi-registry/nifi-registry-current/lib/ext
 
       containers:
         - name: nifi-registry
@@ -43,9 +44,9 @@ spec:
               cpu: 500m
               memory: 768Mi
           volumeMounts:
-            - name: registry-lib
-              mountPath: /opt/nifi-registry/nifi-registry-current/lib
+            - name: registry-lib-ext
+              mountPath: /opt/nifi-registry/nifi-registry-current/lib/ext
 
       volumes:
-        - name: registry-lib
+        - name: registry-lib-ext
           emptyDir: {}
