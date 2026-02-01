@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: nifi-registry
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: 1
   selector:
     matchLabels:
       app: nifi-registry
@@ -20,27 +20,32 @@ spec:
             - -c
             - >
               curl -fL
-              https://repo1.maven.org/maven2/org/postgresql/postgresql/{{ .Values.jdbc.driverVersion }}/postgresql-{{ .Values.jdbc.driverVersion }}.jar
-              -o /opt/nifi-drivers/postgresql.jar
+              https://repo1.maven.org/maven2/org/postgresql/postgresql/42.7.9/postgresql-42.7.9.jar
+              -o /opt/nifi-registry/nifi-registry-current/lib/postgresql.jar
           volumeMounts:
-            - name: drivers
-              mountPath: /opt/nifi-drivers
+            - name: registry-lib
+              mountPath: /opt/nifi-registry/nifi-registry-current/lib
 
       containers:
         - name: nifi-registry
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "apache/nifi-registry:2.6.0"
+          imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 18080
           envFrom:
             - secretRef:
                 name: nifi-registry-db
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}
+            limits:
+              cpu: 2
+              memory: 2Gi
+            requests:
+              cpu: 500m
+              memory: 768Mi
           volumeMounts:
-            - name: drivers
-              mountPath: /opt/nifi-drivers
+            - name: registry-lib
+              mountPath: /opt/nifi-registry/nifi-registry-current/lib
 
       volumes:
-        - name: drivers
+        - name: registry-lib
           emptyDir: {}
